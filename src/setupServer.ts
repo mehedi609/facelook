@@ -1,5 +1,5 @@
 import { Application, json, urlencoded } from 'express';
-import { Server } from 'http';
+import { Server as HttpServer } from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import hpp from 'hpp';
@@ -9,6 +9,7 @@ import HTTP_STATUS from 'http-status-codes';
 import 'express-async-errors';
 
 export class ChattyServer {
+  private PORT: number = Number(process.env.PORT) || 5000;
   constructor(private app: Application) {}
 
   public start(): void {
@@ -50,9 +51,20 @@ export class ChattyServer {
 
   private globalErrorHandler(app: Application): void {}
 
-  private startServer(app: Application): void {}
+  private async startServer(app: Application): Promise<void> {
+    try {
+      const httpServer: HttpServer = new HttpServer(app);
+      this.startHttpServer(httpServer);
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
-  private createSocketIO(httpServer: Server): void {}
+  private createSocketIO(httpServer: HttpServer): void {}
 
-  private startHttpServer(httpServer: Server): void {}
+  private startHttpServer(httpServer: HttpServer): void {
+    httpServer.listen(this.PORT, () => {
+      console.log(`Server is running on port ${this.PORT}`);
+    });
+  }
 }
