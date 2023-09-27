@@ -7,9 +7,9 @@ import compression from 'compression';
 import cookieSession from 'cookie-session';
 import HTTP_STATUS from 'http-status-codes';
 import 'express-async-errors';
+import { config } from './config';
 
 export class ChattyServer {
-  private PORT: number = Number(process.env.PORT) || 5000;
   constructor(private app: Application) {}
 
   public start(): void {
@@ -24,16 +24,16 @@ export class ChattyServer {
     app.use(
       cookieSession({
         name: 'session',
-        keys: ['key1', 'key2'],
+        keys: [config.SECRET_KEY_ONE, config.SECRET_KEY_TWO],
         maxAge: 365 * 24 * 60 * 60 * 1000, // 365 days
-        secure: false,
+        secure: config.NODE_ENV === 'production',
       }),
     );
     app.use(helmet());
     app.use(hpp());
     app.use(
       cors({
-        origin: 'http://localhost:3000',
+        origin: config.CLIENT_URL,
         credentials: true,
         optionsSuccessStatus: HTTP_STATUS.OK,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -63,8 +63,8 @@ export class ChattyServer {
   private createSocketIO(httpServer: HttpServer): void {}
 
   private startHttpServer(httpServer: HttpServer): void {
-    httpServer.listen(this.PORT, () => {
-      console.log(`Server is running on port ${this.PORT}`);
+    httpServer.listen(config.SERVER_PORT, () => {
+      console.log(`Server is running on port ${config.SERVER_PORT}`);
     });
   }
 }
