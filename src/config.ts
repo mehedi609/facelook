@@ -19,6 +19,8 @@ class Config {
   private readonly _CLIENT_URL: string =
     (process.env.CLIENT_LOCAL_URL as string) || '';
   private readonly _SERVER_PORT: number = Number(process.env.PORT) || 5000;
+  private readonly _REDIS_HOST: string =
+    (process.env.REDIS_HOST as string) || '';
 
   public get DATABASE_URL(): string {
     return `${this._DATABASE_URL}/${this._DATABASE}`;
@@ -48,9 +50,12 @@ class Config {
     return this._SERVER_PORT;
   }
 
+  public get REDIS_HOST(): string {
+    return this._REDIS_HOST;
+  }
+
   public validateConfig(): void {
     for (const [key, value] of Object.entries(this)) {
-      console.log(`${key}: ${value}`);
       if (value === undefined) {
         throw new Error(`Missing configuration for ${key}`);
       }
