@@ -9,7 +9,7 @@ export const databaseConnection = (): void => {
       await mongoose.connect(config.DATABASE_URL);
       logger.info('Connected to database');
     } catch (e) {
-      logger.info(`Error occurred while connecting to database ${e}}`);
+      logger.error(`Error occurred while connecting to database ${e}}`);
       return process.exit(1);
     }
   };
