@@ -17,6 +17,7 @@ import { Server } from 'socket.io';
 import { createClient } from 'redis';
 import { createAdapter } from '@socket.io/redis-adapter';
 import 'express-async-errors';
+import bunyan from 'bunyan';
 import { config } from './config';
 import applicationRoutes from './routes';
 import {
@@ -24,6 +25,7 @@ import {
   IErrorResponse,
 } from './shared/globals/helerps/error-handler';
 
+const logger: bunyan = config.createLogger('setupServer');
 export class ChattyServer {
   private readonly corsObj: { origin: string; methods: string[] } = {
     origin: config.CLIENT_URL,
@@ -84,7 +86,7 @@ export class ChattyServer {
         res: Response,
         next: NextFunction,
       ) => {
-        console.log(err);
+        logger.error(err);
         if (err instanceof CustomError) {
           return res.status(err.statusCode).json(err.serializeErrors());
         }
@@ -99,7 +101,7 @@ export class ChattyServer {
       const socketIO: Server = await this.createSocketIO(httpServer);
       this.startHttpServer(httpServer);
     } catch (e) {
-      console.log(e);
+      logger.error(e);
     }
   }
 
@@ -116,9 +118,9 @@ export class ChattyServer {
   }
 
   private startHttpServer(httpServer: HttpServer): void {
-    console.log(`Server has started with process id ${process.pid}`);
+    logger.info(`Server has started with process id ${process.pid}`);
     httpServer.listen(config.SERVER_PORT, () => {
-      console.log(`Server is running on port ${config.SERVER_PORT}`);
+      logger.info(`Server is running on port ${config.SERVER_PORT}`);
     });
   }
 

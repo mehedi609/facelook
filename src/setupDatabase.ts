@@ -1,13 +1,15 @@
 import mongoose from 'mongoose';
+import bunyan from 'bunyan';
 import { config } from './config';
 
+const logger: bunyan = config.createLogger('setupDatabase');
 export const databaseConnection = (): void => {
   const connect = async (): Promise<void> => {
     try {
       await mongoose.connect(config.DATABASE_URL);
-      console.log('Connected to database');
+      logger.info('Connected to database');
     } catch (e) {
-      console.log(`Error occurred while connecting to database ${e}}`);
+      logger.info(`Error occurred while connecting to database ${e}}`);
       return process.exit(1);
     }
   };
