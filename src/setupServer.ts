@@ -1,4 +1,11 @@
-import { Application, json, urlencoded } from 'express';
+import {
+  Application,
+  json,
+  NextFunction,
+  Request,
+  Response,
+  urlencoded,
+} from 'express';
 import { Server as HttpServer } from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -11,6 +18,11 @@ import { createClient } from 'redis';
 import { createAdapter } from '@socket.io/redis-adapter';
 import 'express-async-errors';
 import { config } from './config';
+import applicationRoutes from './routes';
+import {
+  CustomError,
+  IErrorResponse,
+} from './shared/globals/helerps/error-handler';
 
 export class ChattyServer {
   private readonly corsObj: { origin: string; methods: string[] } = {
@@ -53,9 +65,33 @@ export class ChattyServer {
     app.use(urlencoded({ extended: true, limit: '50mb' }));
   }
 
-  private routeMiddlewares(app: Application): void {}
+  private routeMiddlewares(app: Application): void {
+    applicationRoutes(app);
+  }
 
-  private globalErrorHandler(app: Application): void {}
+  private globalErrorHandler(app: Application): void {
+    app.all('*', (req: Request, res: Response) => {
+      res.status(HTTP_STATUS.NOT_FOUND).json({
+        status: 'fail',
+        message: `Can't find ${req.originalUrl} on this server!`,
+      });
+    });
+
+    app.use(
+      (
+        err: IErrorResponse,
+        req: Request,
+        res: Response,
+        next: NextFunction,
+      ) => {
+        console.log(err);
+        if (err instanceof CustomError) {
+          return res.status(err.statusCode).json(err.serializeErrors());
+        }
+        next();
+      },
+    );
+  }
 
   private async startServer(app: Application): Promise<void> {
     try {
