@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import bunyan from 'bunyan';
-import { config } from './config';
+import { config } from '@root/config';
 
 const logger: bunyan = config.createLogger('setupDatabase');
 export const databaseConnection = (): void => {

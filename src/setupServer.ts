@@ -1,11 +1,4 @@
-import {
-  Application,
-  json,
-  NextFunction,
-  Request,
-  Response,
-  urlencoded,
-} from 'express';
+import { Application, json, NextFunction, Request, Response, urlencoded } from 'express';
 import { Server as HttpServer } from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -18,12 +11,9 @@ import { createClient } from 'redis';
 import { createAdapter } from '@socket.io/redis-adapter';
 import 'express-async-errors';
 import bunyan from 'bunyan';
-import { config } from './config';
-import applicationRoutes from './routes';
-import {
-  CustomError,
-  IErrorResponse,
-} from './shared/globals/helerps/error-handler';
+import { config } from '@root/config';
+import applicationRoutes from '@root/routes';
+import { CustomError, IErrorResponse } from '@global/helerps/error-handler';
 
 const logger: bunyan = config.createLogger('setupServer');
 export class ChattyServer {
@@ -79,20 +69,13 @@ export class ChattyServer {
       });
     });
 
-    app.use(
-      (
-        err: IErrorResponse,
-        req: Request,
-        res: Response,
-        next: NextFunction,
-      ) => {
-        logger.error(err);
-        if (err instanceof CustomError) {
-          return res.status(err.statusCode).json(err.serializeErrors());
-        }
-        next();
-      },
-    );
+    app.use((err: IErrorResponse, req: Request, res: Response, next: NextFunction) => {
+      logger.error(err);
+      if (err instanceof CustomError) {
+        return res.status(err.statusCode).json(err.serializeErrors());
+      }
+      next();
+    });
   }
 
   private async startServer(app: Application): Promise<void> {
@@ -125,8 +108,6 @@ export class ChattyServer {
   }
 
   private socketIOConnections(socketIO: Server): void {
-    // socketIO.on('connection', (socket) => {
-    //   console.log(`User connected: ${socket.id}`);
-    // });
+    logger.info(`SocketIO connected`);
   }
 }
